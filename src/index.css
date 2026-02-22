@@ -1,0 +1,26 @@
+@import "./styles/fonts.css";
+@import "./styles/theme.css";
+@import "./styles/tailwind.css";
+/*---break---*/
+@plugin "tailwindcss-animate";
+/*---break---*/
+@custom-variant dark (&:is(.dark *));
+/*@import "tw-animate-css";*/
+
+/* Custom Styles */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
