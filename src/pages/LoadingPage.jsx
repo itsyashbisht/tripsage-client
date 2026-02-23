@@ -82,7 +82,9 @@ export default function LoadingPage () {
   const genError = errorObj.generating;
   
   const heroRef = useRef(null);
-  const hasFired = useRef(false);
+  // tripKey uniquely identifies this generation request — prevents stale/cached responses
+  const tripKey = `${routeState.destination || ''}|${routeState.tier || ''}|${routeState.days || ''}|${routeState.startDate || ''}`;
+  const hasFired = useRef('');  // stores the last tripKey that fired, not just a boolean
   
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '22%']);
@@ -107,11 +109,12 @@ export default function LoadingPage () {
   
   // Fire the API call exactly once
   useEffect(() => {
-    if (hasFired.current) return;
-    hasFired.current = true;
+    // Only fire if this is a new trip (different destination/tier/dates)
+    if (hasFired.current === tripKey) return;
+    hasFired.current = tripKey;
     dispatch(clearGenerated());
     dispatch(generateItinerary(tripParams));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [tripKey]); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Progress bar + step ticker + fact rotator
   useEffect(() => {

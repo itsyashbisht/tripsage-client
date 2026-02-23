@@ -56,42 +56,83 @@ const TIER_ICON = { economy: '🪙', standard: '⭐', luxury: '💎' };
 const TIER_COLOR = { economy: '#16A34A', standard: SAF, luxury: '#9333EA' };
 const SLOT_ICONS = { attraction: '📍', food: '🍛', transport: '🚗', hotel: '🏨', free: '🌿' };
 
-// ─── Hotel Suggestion Card ────────────────────────────────────────────────────
+// ── Curated hero images matched to every Indian destination ──────────────────
+const DEST_IMAGES = {
+  goa: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1920&q=90',
+  jaipur: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=1920&q=90',
+  kerala: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1920&q=90',
+  ladakh: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=1920&q=90',
+  udaipur: 'https://images.unsplash.com/photo-1595658658481-d53d3f999875?auto=format&fit=crop&w=1920&q=90',
+  manali: 'https://images.unsplash.com/photo-1568454537842-d933259bb258?auto=format&fit=crop&w=1920&q=90',
+  rishikesh: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1920&q=90',
+  hampi: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1920&q=90',
+  varanasi: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1920&q=90',
+  andaman: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1920&q=90',
+  coorg: 'https://images.unsplash.com/photo-1594818379496-da1e345b0ded?auto=format&fit=crop&w=1920&q=90',
+  ranthambore: 'https://images.unsplash.com/photo-1615288693743-cb4d0d1cbe9a?auto=format&fit=crop&w=1920&q=90',
+  spiti: 'https://images.unsplash.com/photo-1596401057599-a7b2f96e6c26?auto=format&fit=crop&w=1920&q=90',
+  darjeeling: 'https://images.unsplash.com/photo-1544634076-a90160ddf44e?auto=format&fit=crop&w=1920&q=90',
+  mysuru: 'https://images.unsplash.com/photo-1570939274717-7eda259b3773?auto=format&fit=crop&w=1920&q=90',
+  mumbai: 'https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?auto=format&fit=crop&w=1920&q=90',
+  delhi: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=1920&q=90',
+  agra: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1920&q=90',
+};
+const DEFAULT_HERO = 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1920&q=90';
+
+function getHeroImage (destination = '') {
+  const key = destination.toLowerCase();
+  for (const [k, url] of Object.entries(DEST_IMAGES)) {
+    if (key.includes(k)) return url;
+  }
+  return DEFAULT_HERO;
+}
+
+// ── Validate the AI title actually mentions the destination ──────────────────
+function getTripTitle (aiTitle, destination, days, tier) {
+  const dest = (destination || '').split(',')[0].trim();
+  if (aiTitle && dest && aiTitle.toLowerCase().includes(dest.toLowerCase().split(' ')[0])) {
+    return aiTitle;  // AI title is destination-specific — use it
+  }
+  // AI title is wrong (mentions another city) — generate a correct fallback
+  const fallbacks = {
+    economy: [`Budget Explorer: ${dest} in ${days} Days`, `${dest} on a Shoestring`, `Backpacker's ${dest}`],
+    standard: [`${days} Days in ${dest}`, `Discovering ${dest}`, `The Best of ${dest}`],
+    luxury: [`Royal ${dest} Experience`, `${dest} in Style`, `Luxury & Legacy: ${dest}`],
+  };
+  const opts = fallbacks[tier] || fallbacks.standard;
+  return opts[Math.floor(Math.random() * opts.length)];
+}
+
+// ─── Hotel Suggestion Card ───────────────────────────────────────────────────
 function HotelCard ({ hotel, adults }) {
-  const totalPerNight = hotel.pricePerNight || 0;
   return (
     <div style={{
       background: hotel.isRecommended ? SAF_BG : '#fff',
       border: `1.5px solid ${hotel.isRecommended ? SAF : '#E5E7EB'}`,
-      borderRadius: 18, padding: '16px', position: 'relative',
+      borderRadius: 18, padding: '16px', position: 'relative'
     }}>
       {hotel.isRecommended && (
         <div style={{
-          position: 'absolute', top: -10, left: 16,
-          background: SAF, color: '#fff', borderRadius: 999,
-          padding: '3px 12px', fontSize: 10, fontWeight: 800, fontFamily: F
+          position: 'absolute', top: -10, left: 16, background: SAF, color: '#fff',
+          borderRadius: 999, padding: '3px 12px', fontSize: 10, fontWeight: 800, fontFamily: F
         }}>
           ★ Recommended
         </div>
       )}
       <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        gap: 10,
-        marginTop: hotel.isRecommended ? 6 : 0
+        display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+        gap: 10, marginTop: hotel.isRecommended ? 6 : 0
       }}>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontFamily: F, fontWeight: 800, fontSize: 14, color: '#111', marginBottom: 3 }}>
-            {hotel.name}
-          </p>
-          <p style={{ fontFamily: F, fontSize: 11, color: '#9CA3AF', marginBottom: 5 }}>
-            {hotel.type} · {hotel.location}
-          </p>
+          <p style={{ fontFamily: F, fontWeight: 800, fontSize: 14, color: '#111', marginBottom: 3 }}>{hotel.name}</p>
+          <p style={{
+            fontFamily: F,
+            fontSize: 11,
+            color: '#9CA3AF',
+            marginBottom: 5
+          }}>{hotel.type} · {hotel.location}</p>
           {hotel.whyStayHere && (
-            <p style={{ fontFamily: F, fontSize: 12, color: '#6B7280', lineHeight: 1.6 }}>
-              {hotel.whyStayHere}
-            </p>
+            <p style={{ fontFamily: F, fontSize: 12, color: '#6B7280', lineHeight: 1.6 }}>{hotel.whyStayHere}</p>
           )}
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -102,7 +143,7 @@ function HotelCard ({ hotel, adults }) {
             color: hotel.isRecommended ? SAF : '#111',
             margin: 0
           }}>
-            ₹{totalPerNight?.toLocaleString('en-IN')}
+            ₹{(hotel.pricePerNight || 0).toLocaleString('en-IN')}
           </p>
           <p style={{ fontFamily: F, fontSize: 10, color: '#9CA3AF', margin: 0 }}>per night</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 3, marginTop: 4 }}>
@@ -123,23 +164,32 @@ function FoodSuggestions ({ suggestions, mealLabel }) {
   const active = suggestions[selected];
   return (
     <div style={{
-      marginTop: 14, background: '#F9FAFB', borderRadius: 16,
-      border: '1px solid #F0F0F0', overflow: 'hidden'
+      marginTop: 14,
+      background: '#F9FAFB',
+      borderRadius: 16,
+      border: '1px solid #F0F0F0',
+      overflow: 'hidden'
     }}>
-      {/* Header */}
       <div style={{
-        padding: '10px 14px', borderBottom: '1px solid #F0F0F0',
-        display: 'flex', alignItems: 'center', gap: 6
+        padding: '10px 14px',
+        borderBottom: '1px solid #F0F0F0',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6
       }}>
         <span style={{ fontSize: 14 }}>🍽️</span>
         <p style={{
-          fontFamily: F, fontSize: 11, fontWeight: 800, color: '#9CA3AF',
-          textTransform: 'uppercase', letterSpacing: '0.12em', margin: 0
+          fontFamily: F,
+          fontSize: 11,
+          fontWeight: 800,
+          color: '#9CA3AF',
+          textTransform: 'uppercase',
+          letterSpacing: '0.12em',
+          margin: 0
         }}>
           {mealLabel} — Pick a spot
         </p>
       </div>
-      {/* Tab selectors */}
       <div
         style={{ display: 'flex', padding: '10px 12px', gap: 6, flexWrap: 'wrap', borderBottom: '1px solid #F0F0F0' }}>
         {suggestions.map((s, i) => (
@@ -147,8 +197,7 @@ function FoodSuggestions ({ suggestions, mealLabel }) {
                   style={{
                     padding: '6px 14px', borderRadius: 999, fontFamily: F, fontSize: 12,
                     fontWeight: selected === i ? 700 : 500, cursor: 'pointer', border: '1.5px solid',
-                    borderColor: selected === i ? SAF : '#E5E7EB',
-                    background: selected === i ? SAF_BG : '#fff',
+                    borderColor: selected === i ? SAF : '#E5E7EB', background: selected === i ? SAF_BG : '#fff',
                     color: selected === i ? SAF : '#6B7280', transition: 'all 0.15s',
                     display: 'flex', alignItems: 'center', gap: 5
                   }}>
@@ -157,40 +206,52 @@ function FoodSuggestions ({ suggestions, mealLabel }) {
           </button>
         ))}
       </div>
-      {/* Selected detail */}
       {active && (
         <div style={{
-          padding: '12px 14px', display: 'flex', flexWrap: 'wrap',
-          justifyContent: 'space-between', alignItems: 'flex-start', gap: 10
+          padding: '12px 14px',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          gap: 10
         }}>
           <div>
-            <p style={{ fontFamily: F, fontSize: 13, fontWeight: 700, color: '#111', marginBottom: 3 }}>
-              {active.name}
-            </p>
-            <p style={{ fontFamily: F, fontSize: 12, color: '#6B7280', marginBottom: 4 }}>
-              {active.cuisine} · {active.vibe}
-            </p>
+            <p
+              style={{ fontFamily: F, fontSize: 13, fontWeight: 700, color: '#111', marginBottom: 3 }}>{active.name}</p>
+            <p style={{
+              fontFamily: F,
+              fontSize: 12,
+              color: '#6B7280',
+              marginBottom: 4
+            }}>{active.cuisine} · {active.vibe}</p>
             {active.mustOrder && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 12 }}>⭐</span>
-                <p style={{ fontFamily: F, fontSize: 12, color: SAF, fontWeight: 700, margin: 0 }}>
-                  Must order: {active.mustOrder}
-                </p>
+                <p style={{ fontFamily: F, fontSize: 12, color: SAF, fontWeight: 700, margin: 0 }}>Must
+                  order: {active.mustOrder}</p>
               </div>
             )}
           </div>
           <div style={{ textAlign: 'right' }}>
-            <p style={{ fontFamily: FM, fontWeight: 800, fontSize: '1rem', color: SAF, margin: 0 }}>
-              ₹{active.pricePerPerson?.toLocaleString('en-IN')}
-            </p>
+            <p style={{
+              fontFamily: FM,
+              fontWeight: 800,
+              fontSize: '1rem',
+              color: SAF,
+              margin: 0
+            }}>₹{active.pricePerPerson?.toLocaleString('en-IN')}</p>
             <p style={{ fontFamily: F, fontSize: 10, color: '#9CA3AF' }}>per person</p>
             {active.isVeg && (
               <span style={{
-                fontFamily: F, fontSize: 10, fontWeight: 700, color: '#16A34A',
-                background: '#DCFCE7', borderRadius: 999, padding: '2px 8px', display: 'inline-block'
-              }}>
-                🌿 Veg
-              </span>
+                fontFamily: F,
+                fontSize: 10,
+                fontWeight: 700,
+                color: '#16A34A',
+                background: '#DCFCE7',
+                borderRadius: 999,
+                padding: '2px 8px',
+                display: 'inline-block'
+              }}>🌿 Veg</span>
             )}
           </div>
         </div>
@@ -212,19 +273,37 @@ export default function ResultsPage () {
   const shareData = useSelector(selectShareData);
   
   const aiItinerary = state.itinerary || null;
-  const destination = aiItinerary?.destination?.name || aiItinerary?.destinationName || state.destination || 'Your Destination';
+  
+  // Destination — try every possible field in priority order
+  const destination =
+    aiItinerary?.destinationName ||
+    aiItinerary?.destination?.name ||
+    state.destination || 'Your Destination';
+  
   const days = aiItinerary?.totalDays || state.days || 3;
   const adults = aiItinerary?.adults || state.adults || 2;
   const tier = (aiItinerary?.budgetTier || state.tier || 'standard').toLowerCase();
+  
+  // Dynamic hero image based on destination name
+  const heroImage = getHeroImage(destination);
+  
+  // Title — validate AI title mentions destination, fallback if wrong
+  const pageTitle = getTripTitle(aiItinerary?.title, destination, days, tier);
+  
+  // All days sorted — ensures tabs always show every day in order
+  const allDays = [...(aiItinerary?.days || [])].sort((a, b) => a.dayNumber - b.dayNumber);
   
   const [activeDay, setActiveDay] = useState(1);
   const [budgetTier, setBudgetTier] = useState(tier);
   const [copied, setCopied] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
+  // Reset active day when itinerary changes
+  useEffect(() => { setActiveDay(1); }, [aiItinerary?._id]);
+  
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '28%']);
+  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
   const fadeOut = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   
   const budgetBreakdowns = aiItinerary?.budgetBreakdown || [];
@@ -236,7 +315,9 @@ export default function ResultsPage () {
     { name: 'Entry Fees', value: currentBreakdown.entryFees },
   ].filter(d => d.value > 0) : [];
   
-  const daySlots = aiItinerary?.days?.find(d => d.dayNumber === activeDay)?.slots || [];
+  // Active day slots — looked up from allDays (sorted, complete)
+  const daySlots = allDays.find(d => d.dayNumber === activeDay)?.slots || [];
+  
   const hotelSuggestions = state.hotelSuggestions || aiItinerary?.hotelSuggestions || [];
   
   const shareUrl = shareData?.shareUrl || state.shareUrl ||
@@ -280,36 +361,36 @@ export default function ResultsPage () {
     );
   }
   
-  // ─── Sidebar content ──────────────────────────────────────────────────────
+  // ─── Sidebar (shared by mobile drawer + desktop sticky column) ──────────────
   const SidebarContent = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       
-      {/* ── Hotel Suggestions ── */}
+      {/* Hotel Suggestions */}
       {hotelSuggestions.length > 0 && (
         <div style={{ background: '#fff', borderRadius: 22, border: '1px solid #F3F4F6', overflow: 'hidden' }}>
           <div style={{
-            padding: '16px 20px', borderBottom: '1px solid #F3F4F6',
-            display: 'flex', alignItems: 'center', gap: 10
+            padding: '16px 20px',
+            borderBottom: '1px solid #F3F4F6',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10
           }}>
             <Hotel size={16} style={{ color: SAF }}/>
             <div>
-              <h3 style={{ fontFamily: F, fontWeight: 800, fontSize: '0.95rem', color: '#111', margin: 0 }}>
-                Where to Stay
-              </h3>
+              <h3 style={{ fontFamily: F, fontWeight: 800, fontSize: '0.95rem', color: '#111', margin: 0 }}>Where to
+                Stay</h3>
               <p style={{ fontFamily: F, fontSize: 11, color: '#9CA3AF', margin: 0 }}>
                 For {adults} guest{adults > 1 ? 's' : ''} · {days} night{days > 1 ? 's' : ''}
               </p>
             </div>
           </div>
           <div style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {hotelSuggestions.map((hotel, i) => (
-              <HotelCard key={i} hotel={hotel} adults={adults}/>
-            ))}
+            {hotelSuggestions.map((hotel, i) => <HotelCard key={i} hotel={hotel} adults={adults}/>)}
           </div>
         </div>
       )}
       
-      {/* ── Budget breakdown ── */}
+      {/* Budget Breakdown */}
       <div style={{ background: '#fff', borderRadius: 22, border: '1px solid #F3F4F6', overflow: 'hidden' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #F3F4F6' }}>
           <h3 style={{ fontFamily: F, fontWeight: 800, fontSize: '0.95rem', color: '#111', margin: 0 }}>Budget
@@ -323,8 +404,7 @@ export default function ResultsPage () {
                       fontWeight: budgetTier === t ? 800 : 500, cursor: 'pointer',
                       border: `1.5px solid ${budgetTier === t ? TIER_COLOR[t] : '#E5E7EB'}`,
                       background: budgetTier === t ? TIER_COLOR[t] : 'transparent',
-                      color: budgetTier === t ? '#fff' : '#6B7280', transition: 'all 0.18s',
-                      textTransform: 'capitalize'
+                      color: budgetTier === t ? '#fff' : '#6B7280', transition: 'all 0.18s', textTransform: 'capitalize'
                     }}>
               {TIER_ICON[t]} {t}
             </button>
@@ -349,8 +429,8 @@ export default function ResultsPage () {
             {chartData.length > 0 && (
               <ResponsiveContainer width="100%" height={150}>
                 <PieChart>
-                  <Pie data={chartData} cx="50%" cy="50%" innerRadius={46} outerRadius={68}
-                       paddingAngle={3} dataKey="value">
+                  <Pie data={chartData} cx="50%" cy="50%" innerRadius={46} outerRadius={68} paddingAngle={3}
+                       dataKey="value">
                     {chartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % 4]}/>)}
                   </Pie>
                   <Tooltip formatter={v => `₹${v.toLocaleString('en-IN')}`}/>
@@ -370,29 +450,32 @@ export default function ResultsPage () {
                       style={{ width: 10, height: 10, borderRadius: 3, background: CHART_COLORS[i], flexShrink: 0 }}/>
                     <span style={{ fontFamily: F, fontSize: 12, color: '#6B7280' }}>{item.label}</span>
                   </div>
-                  <span style={{ fontFamily: FM, fontSize: 12, fontWeight: 700, color: '#111' }}>
-                    ₹{item.value?.toLocaleString('en-IN')}
-                  </span>
+                  <span style={{
+                    fontFamily: FM,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: '#111'
+                  }}>₹{item.value?.toLocaleString('en-IN')}</span>
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <p style={{ fontFamily: F, fontSize: 13, color: '#9CA3AF', textAlign: 'center', padding: '20px' }}>
-            No budget data available
-          </p>
+          <p style={{ fontFamily: F, fontSize: 13, color: '#9CA3AF', textAlign: 'center', padding: '20px' }}>No budget
+            data available</p>
         )}
       </div>
       
-      {/* ── Local phrases ── */}
+      {/* Local Phrases */}
       {aiItinerary.localPhrases?.length > 0 && (
         <div style={{
           background: 'linear-gradient(135deg, #111 0%, #1f1208 100%)',
-          borderRadius: 22, padding: 'clamp(16px,2vw,22px)', color: '#fff'
+          borderRadius: 22,
+          padding: 'clamp(16px,2vw,22px)',
+          color: '#fff'
         }}>
-          <p style={{ fontFamily: F, fontWeight: 800, fontSize: '0.93rem', marginBottom: 14 }}>
-            🗣️ Useful Local Phrases
-          </p>
+          <p style={{ fontFamily: F, fontWeight: 800, fontSize: '0.93rem', marginBottom: 14 }}>🗣️ Useful Local
+            Phrases</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {aiItinerary.localPhrases.slice(0, 4).map((p, i) => (
               <div key={i} style={{
@@ -407,7 +490,7 @@ export default function ResultsPage () {
         </div>
       )}
       
-      {/* ── Plan another ── */}
+      {/* Plan another */}
       <Link to="/planner" style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         gap: 10, background: SAF, color: '#fff', borderRadius: 999, padding: '14px',
@@ -424,64 +507,98 @@ export default function ResultsPage () {
     <div style={{ fontFamily: F, color: '#111', background: '#F9FAFB', minHeight: '100vh', overflowX: 'hidden' }}>
       <Navbar/>
       
-      {/* ── Hero ── */}
-      <section ref={heroRef} style={{ position: 'relative', height: 'clamp(280px,46vh,480px)', overflow: 'hidden' }}>
+      {/* ── Hero — destination-specific image, cinematic overlays ── */}
+      <section ref={heroRef} style={{ position: 'relative', height: 'clamp(340px,54vh,540px)', overflow: 'hidden' }}>
+        
+        {/* Parallax background — changes per destination */}
         <motion.div style={{
           y: bgY, position: 'absolute', inset: '-20% 0', zIndex: 0,
-          backgroundImage: 'url(\'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=1920&q=85\')',
-          backgroundSize: 'cover', backgroundPosition: 'center 38%'
+          backgroundImage: `url('${heroImage}')`,
+          backgroundSize: 'cover', backgroundPosition: 'center 40%'
+        }}/>
+        
+        {/* Cinematic overlays — deep dark + saffron warmth from below */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 1,
+          background: 'linear-gradient(to bottom, rgba(5,2,10,0.38) 0%, rgba(5,2,10,0.82) 100%)'
         }}/>
         <div style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 1,
-          background: 'linear-gradient(to bottom, rgba(8,4,2,0.48) 0%, rgba(8,4,2,0.82) 100%)'
+          position: 'absolute', inset: 0, zIndex: 1,
+          background: 'radial-gradient(ellipse at 50% 115%, rgba(232,101,10,0.42) 0%, transparent 60%)'
         }}/>
         <div style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 1,
-          background: 'radial-gradient(ellipse at 52% 50%, rgba(232,101,10,0.18) 0%, transparent 60%)'
+          position: 'absolute', inset: 0, zIndex: 1,
+          background: 'radial-gradient(ellipse at 50% -5%, rgba(0,0,0,0.48) 0%, transparent 55%)'
         }}/>
         
         <motion.div style={{
           opacity: fadeOut, position: 'relative', zIndex: 2, height: '100%',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          textAlign: 'center', padding: 'clamp(72px,10vw,96px) clamp(20px,5vw,40px) 0'
+          textAlign: 'center', padding: 'clamp(80px,10vw,110px) clamp(20px,5vw,48px) 0'
         }}>
-          <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                    style={{
-                      color: SAF, fontSize: 12, fontWeight: 700, textTransform: 'uppercase',
-                      letterSpacing: '0.22em', marginBottom: 14
-                    }}>
-            {TIER_ICON[tier]} {tier.charAt(0).toUpperCase() + tier.slice(1)} Plan · {days} Days
-          </motion.p>
-          <motion.h1 initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}
+          
+          {/* Location + tier chip */}
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 8,
+                        background: 'rgba(255,255,255,0.10)', backdropFilter: 'blur(14px)',
+                        border: '1px solid rgba(255,255,255,0.22)',
+                        borderRadius: 999, padding: '7px 18px', marginBottom: 22
+                      }}>
+            <span style={{ fontSize: 14 }}>📍</span>
+            <span style={{ color: '#fff', fontSize: 13, fontWeight: 700, fontFamily: F, letterSpacing: '0.04em' }}>
+              {destination.split(',')[0]}
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>·</span>
+            <span style={{ color: SAF, fontSize: 12, fontWeight: 700, fontFamily: F }}>
+              {TIER_ICON[tier]} {tier.charAt(0).toUpperCase() + tier.slice(1)}
+            </span>
+            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12 }}>·</span>
+            <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: 12, fontFamily: FM }}>
+              {days}N
+            </span>
+          </motion.div>
+          
+          {/* Title — always shows correct destination name */}
+          <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                      style={{
-                       color: '#fff',
-                       fontWeight: 900,
-                       fontSize: 'clamp(1.6rem,4.5vw,3.2rem)',
-                       lineHeight: 1.06,
-                       marginBottom: 18
+                       color: '#fff', fontWeight: 900,
+                       fontSize: 'clamp(1.65rem,5vw,3.6rem)',
+                       lineHeight: 1.04, marginBottom: 20,
+                       textShadow: '0 4px 32px rgba(0,0,0,0.55)'
                      }}>
-            {aiItinerary.title || `Your ${destination} Itinerary`}
+            {pageTitle}
           </motion.h1>
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}
+          
+          {/* Meta pills */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }}
+                      style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 26 }}>
+            {[
+              `🌙 ${days} night${days !== 1 ? 's' : ''}`,
+              `👥 ${adults} adult${adults > 1 ? 's' : ''}`,
+              aiItinerary?.bestTimeToVisit ? `🗓 Best: ${aiItinerary.bestTimeToVisit}` : null,
+            ].filter(Boolean).map((pill, i) => (
+              <span key={i} style={{
+                background: 'rgba(255,255,255,0.11)', backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.18)', borderRadius: 999,
+                padding: '6px 16px', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.90)'
+              }}>
+                {pill}
+              </span>
+            ))}
+          </motion.div>
+          
+          {/* Action buttons */}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42 }}
                       style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
             <motion.button onClick={handleSave} disabled={itin_loading.save || itin_success.save}
                            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }}
                            style={{
-                             display: 'flex',
-                             alignItems: 'center',
-                             gap: 8,
-                             padding: '11px clamp(14px,2vw,22px)',
-                             borderRadius: 999,
-                             background: itin_success.save ? '#DCFCE7' : 'rgba(255,255,255,0.14)',
+                             display: 'flex', alignItems: 'center', gap: 8, padding: '11px clamp(14px,2vw,22px)',
+                             borderRadius: 999, background: itin_success.save ? '#DCFCE7' : 'rgba(255,255,255,0.14)',
                              backdropFilter: 'blur(12px)',
                              border: `1px solid ${itin_success.save ? '#86EFAC' : 'rgba(255,255,255,0.28)'}`,
-                             fontFamily: F,
-                             fontSize: 14,
-                             fontWeight: 700,
+                             fontFamily: F, fontSize: 14, fontWeight: 700,
                              cursor: itin_loading.save ? 'wait' : 'pointer',
                              color: itin_success.save ? '#15803D' : '#fff'
                            }}>
@@ -493,7 +610,8 @@ export default function ResultsPage () {
                            style={{
                              display: 'flex', alignItems: 'center', gap: 8, padding: '11px clamp(14px,2vw,22px)',
                              borderRadius: 999, background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(12px)',
-                             border: '1px solid rgba(255,255,255,0.28)', fontFamily: F, fontSize: 14, fontWeight: 700,
+                             border: '1px solid rgba(255,255,255,0.28)',
+                             fontFamily: F, fontSize: 14, fontWeight: 700,
                              cursor: itin_loading.share ? 'wait' : 'pointer', color: '#fff'
                            }}>
               {copied ? <><Check size={15}/> Copied!</> : shareUrl ? <><Copy size={15}/> Copy Link</> : <><Share2
@@ -512,8 +630,7 @@ export default function ResultsPage () {
                   style={{
                     width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     background: '#fff', border: '1px solid #E5E7EB', borderRadius: 16,
-                    padding: '14px 18px', fontFamily: F, fontSize: 14, fontWeight: 700,
-                    color: '#111', cursor: 'pointer'
+                    padding: '14px 18px', fontFamily: F, fontSize: 14, fontWeight: 700, color: '#111', cursor: 'pointer'
                   }}>
             <span>🏨 Hotels, Budget & Details</span>
             {sidebarOpen ? <ChevronUp size={18} style={{ color: '#9CA3AF' }}/> : <ChevronDown size={18}
@@ -535,14 +652,15 @@ export default function ResultsPage () {
           
           {/* ── Left: Itinerary ── */}
           <div>
-            {/* Day tabs */}
+            
+            {/* Day tabs — shows EVERY day, horizontally scrollable */}
             <Reveal>
               <div style={{
                 display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, marginBottom: 24,
                 scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch',
                 scrollbarWidth: 'none', msOverflowStyle: 'none'
               }}>
-                {aiItinerary.days?.map(d => (
+                {allDays.map(d => (
                   <motion.button key={d.dayNumber} onClick={() => setActiveDay(d.dayNumber)}
                                  whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                                  style={{
@@ -551,7 +669,7 @@ export default function ResultsPage () {
                                    background: activeDay === d.dayNumber ? SAF : '#fff',
                                    color: activeDay === d.dayNumber ? '#fff' : '#6B7280',
                                    border: `1.5px solid ${activeDay === d.dayNumber ? SAF : '#E5E7EB'}`,
-                                   cursor: 'pointer', flexShrink: 0, scrollSnapAlign: 'start',
+                                   cursor: 'pointer', flexShrink: 0, scrollSnapAlign: 'start', whiteSpace: 'nowrap',
                                    boxShadow: activeDay === d.dayNumber ? '0 4px 16px rgba(232,101,10,0.30)' : 'none'
                                  }}>
                     Day {d.dayNumber}
@@ -562,7 +680,7 @@ export default function ResultsPage () {
             
             {/* Active day header */}
             {(() => {
-              const day = aiItinerary.days?.find(d => d.dayNumber === activeDay);
+              const day = allDays.find(d => d.dayNumber === activeDay);
               if (!day) return null;
               return (
                 <Reveal style={{ marginBottom: 20 }}>
@@ -575,29 +693,39 @@ export default function ResultsPage () {
                       fontFamily: FM, fontSize: 11, color: SAF, fontWeight: 700,
                       textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 5
                     }}>
-                      Day {day.dayNumber}
+                      Day {day.dayNumber} of {allDays.length}
                     </p>
                     <h2 style={{
-                      fontFamily: F,
-                      fontWeight: 900,
-                      fontSize: 'clamp(1rem,2.5vw,1.3rem)',
-                      color: '#111',
-                      marginBottom: day.summary ? 8 : 0
+                      fontFamily: F, fontWeight: 900, fontSize: 'clamp(1rem,2.5vw,1.3rem)',
+                      color: '#111', marginBottom: day.summary ? 8 : 0
                     }}>
                       {day.title || `Day ${day.dayNumber}`}
                     </h2>
                     {day.summary && (
-                      <p style={{ fontFamily: F, fontSize: 14, color: '#6B7280', lineHeight: 1.7 }}>{day.summary}</p>
+                      <p style={{
+                        fontFamily: F,
+                        fontSize: 14,
+                        color: '#6B7280',
+                        lineHeight: 1.7,
+                        margin: 0
+                      }}>{day.summary}</p>
                     )}
                   </div>
                 </Reveal>
               );
             })()}
             
-            {/* Slots */}
-            <motion.div variants={stagger} initial="hidden" animate="show"
+            {/* Slots — re-animate on day change via key prop */}
+            <motion.div key={`day-${activeDay}`} variants={stagger} initial="hidden" animate="show"
                         style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {daySlots.map((slot, idx) => (
+              {daySlots.length === 0 ? (
+                <div style={{
+                  background: '#fff', borderRadius: 20, padding: '32px',
+                  textAlign: 'center', border: '1px solid #F3F4F6'
+                }}>
+                  <p style={{ fontFamily: F, fontSize: 14, color: '#9CA3AF' }}>No activities found for this day.</p>
+                </div>
+              ) : daySlots.map((slot, idx) => (
                 <motion.div key={idx} variants={cardV}
                             style={{
                               background: '#fff', borderRadius: 20,
@@ -607,8 +735,7 @@ export default function ResultsPage () {
                   <div style={{ display: 'flex', gap: 'clamp(12px,2vw,18px)', alignItems: 'flex-start' }}>
                     <div style={{
                       width: 42, height: 42, borderRadius: 13, background: SAF_BG,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 20, flexShrink: 0
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0
                     }}>
                       {SLOT_ICONS[slot.type] || '📍'}
                     </div>
@@ -619,13 +746,20 @@ export default function ResultsPage () {
                       }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           {slot.timeLabel && (
-                            <p style={{ fontFamily: FM, fontSize: 11, color: SAF, fontWeight: 700, marginBottom: 2 }}>
-                              {slot.timeLabel}
-                            </p>
+                            <p style={{
+                              fontFamily: FM,
+                              fontSize: 11,
+                              color: SAF,
+                              fontWeight: 700,
+                              marginBottom: 2
+                            }}>{slot.timeLabel}</p>
                           )}
                           <h3 style={{
-                            fontFamily: F, fontWeight: 800,
-                            fontSize: 'clamp(0.88rem,1.6vw,1rem)', color: '#111', margin: 0
+                            fontFamily: F,
+                            fontWeight: 800,
+                            fontSize: 'clamp(0.88rem,1.6vw,1rem)',
+                            color: '#111',
+                            margin: 0
                           }}>
                             {slot.title}
                           </h3>
@@ -645,12 +779,8 @@ export default function ResultsPage () {
                         </p>
                       )}
                       
-                      {/* ── Restaurant suggestions for food slots ── */}
                       {slot.type === 'food' && slot.suggestions?.length > 0 && (
-                        <FoodSuggestions
-                          suggestions={slot.suggestions}
-                          mealLabel={slot.title}
-                        />
+                        <FoodSuggestions suggestions={slot.suggestions} mealLabel={slot.title}/>
                       )}
                       
                       {slot.aiTip && (
@@ -682,19 +812,21 @@ export default function ResultsPage () {
                 <div style={{ background: '#fff', borderRadius: 22, border: '1px solid #F3F4F6', overflow: 'hidden' }}>
                   <div
                     style={{ padding: 'clamp(14px,2vw,20px) clamp(18px,3vw,28px)', borderBottom: '1px solid #F3F4F6' }}>
-                    <h3 style={{ fontFamily: F, fontWeight: 800, fontSize: '1.05rem', color: '#111', margin: 0 }}>✈️
-                      Travel Tips</h3>
+                    <h3 style={{ fontFamily: F, fontWeight: 800, fontSize: '1.05rem', color: '#111', margin: 0 }}>
+                      ✈️ Travel Tips for {destination.split(',')[0]}
+                    </h3>
                   </div>
                   <div style={{
                     padding: 'clamp(16px,2vw,22px) clamp(18px,3vw,28px)',
-                    display: 'flex', flexDirection: 'column', gap: 12
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12
                   }}>
                     {aiItinerary.travelTips.map((tip, i) => (
                       <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                         <div style={{
                           width: 22, height: 22, borderRadius: '50%', background: SAF_BG,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          flexShrink: 0, marginTop: 1
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1
                         }}>
                           <span style={{ fontFamily: FM, fontSize: 10, fontWeight: 900, color: SAF }}>{i + 1}</span>
                         </div>
