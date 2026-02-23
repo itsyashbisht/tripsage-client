@@ -1,5 +1,3 @@
-// src/pages/LoadingPage.jsx
-// Fixed: correctly extracts itinerary + hotelSuggestions from Redux, uses useNavigate
 import { Navbar } from '../components/Navbar';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
