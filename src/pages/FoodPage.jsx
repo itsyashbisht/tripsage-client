@@ -439,7 +439,7 @@ export default function FoodPage () {
                             marginBottom: 7
                           }}>Must Try</p>
                           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                            { rest.mustTryDishes && rest.mustTryDishes.slice(0, 3).map(dish => (
+                            {rest.mustTryDishes && rest.mustTryDishes.slice(0, 3).map(dish => (
                               <span key={dish} style={{
                                 fontFamily: FONT,
                                 fontSize: 11,
@@ -453,7 +453,11 @@ export default function FoodPage () {
                           </div>
                         </div>
                       )}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}>
                         <div>
                           <p style={{
                             fontFamily: MONO,
