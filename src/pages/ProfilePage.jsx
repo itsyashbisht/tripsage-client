@@ -1,4 +1,3 @@
-// src/pages/ProfilePage.jsx
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
@@ -142,9 +141,9 @@ export default function ProfilePage () {
   const error = useSelector(selectUserError);
   const success = useSelector(selectUserSuccess);
   
-  const user = profile || authUser;
+  const user = profile?.user || authUser;
   
-  const [tab, setTab] = useState('profile');  // 'profile' | 'password' | 'saved'
+  const [tab, setTab] = useState('profile');  // profile | password | saved
   const [toast, setToast] = useState(null);
   
   // Profile form
@@ -164,7 +163,7 @@ export default function ProfilePage () {
   
   useEffect(() => {
     if (user) {
-      setName(user.fullname || '');
+      setName(user.fullname);
       setAvatar(user.avatar || '');
     }
   }, [user]);
