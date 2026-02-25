@@ -1,7 +1,5 @@
-// src/pages/PlannerPage.jsx
-// Navigation: useNavigate ONLY — no <Link> wrapper on any button
 import { Navbar } from '../components/Navbar';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectPlannerForm, setPlannerForm } from '../store';
@@ -23,17 +21,126 @@ const pkgV = {
 };
 const gridC = { hidden: {}, show: { transition: { staggerChildren: 0.11 } } };
 
+// ── Departure cities — all major Indian airports / rail hubs ────────────────
 const CITIES = [
+  // Metros
   'New Delhi', 'Mumbai', 'Bengaluru', 'Hyderabad', 'Chennai', 'Kolkata',
+  // Tier-1
   'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow', 'Chandigarh', 'Bhopal', 'Surat',
+  'Nagpur', 'Kochi', 'Indore', 'Visakhapatnam', 'Patna', 'Coimbatore',
+  // Tier-2 with good connectivity
+  'Bhubaneswar', 'Guwahati', 'Thiruvananthapuram', 'Vadodara', 'Agra',
+  'Varanasi', 'Amritsar', 'Jodhpur', 'Dehradun', 'Ranchi', 'Raipur',
+  'Jammu', 'Srinagar', 'Madurai', 'Tiruchirappalli', 'Hubli', 'Mangaluru',
+  'Vijayawada', 'Aurangabad', 'Kolhapur', 'Goa (Panaji)', 'Udaipur',
 ];
-const DESTINATIONS = [
-  'Jaipur, Rajasthan', 'Goa', 'Kerala Backwaters', 'Ladakh',
-  'Udaipur, Rajasthan', 'Manali, Himachal Pradesh', 'Rishikesh, Uttarakhand',
-  'Hampi, Karnataka', 'Varanasi, Uttar Pradesh', 'Andaman Islands',
-  'Coorg, Karnataka', 'Ranthambore, Rajasthan', 'Spiti Valley',
-  'Darjeeling', 'Mysuru, Karnataka',
+
+// ── All popular Indian destinations — grouped by region ─────────────────────
+// 120+ destinations used by real travellers
+const DESTINATION_GROUPS = [
+  {
+    group: '🏔️ Himalayas & Hill Stations',
+    places: [
+      'Ladakh', 'Manali, Himachal Pradesh', 'Spiti Valley, Himachal Pradesh',
+      'Shimla, Himachal Pradesh', 'Kasol, Himachal Pradesh', 'Dharamshala & McLeod Ganj',
+      'Dalhousie, Himachal Pradesh', 'Khajjiar, Himachal Pradesh',
+      'Mussoorie, Uttarakhand', 'Rishikesh, Uttarakhand', 'Haridwar, Uttarakhand',
+      'Auli, Uttarakhand', 'Chopta, Uttarakhand', 'Nainital, Uttarakhand',
+      'Jim Corbett, Uttarakhand', 'Munsiyari, Uttarakhand',
+      'Darjeeling, West Bengal', 'Gangtok, Sikkim', 'Lachung, Sikkim',
+      'Pelling, Sikkim', 'Zuluk, Sikkim',
+      'Shillong, Meghalaya', 'Cherrapunji, Meghalaya', 'Dzukou Valley, Nagaland',
+      'Tawang, Arunachal Pradesh', 'Ziro Valley, Arunachal Pradesh',
+      'Srinagar, Kashmir', 'Gulmarg, Kashmir', 'Pahalgam, Kashmir', 'Sonamarg, Kashmir',
+    ],
+  },
+  {
+    group: '🏜️ Rajasthan & Desert',
+    places: [
+      'Jaipur, Rajasthan', 'Udaipur, Rajasthan', 'Jodhpur, Rajasthan',
+      'Jaisalmer, Rajasthan', 'Pushkar, Rajasthan', 'Ranthambore, Rajasthan',
+      'Bundi, Rajasthan', 'Chittorgarh, Rajasthan', 'Bikaner, Rajasthan',
+      'Mount Abu, Rajasthan', 'Kumbhalgarh, Rajasthan', 'Ajmer, Rajasthan',
+    ],
+  },
+  {
+    group: '🌊 Beaches & Coastal',
+    places: [
+      'Goa (North)', 'Goa (South)', 'Pondicherry, Tamil Nadu',
+      'Andaman Islands', 'Lakshadweep', 'Diu, Gujarat',
+      'Varkala, Kerala', 'Kovalam, Kerala', 'Kumarakom, Kerala',
+      'Tarkarli, Maharashtra', 'Alibaug, Maharashtra', 'Murud, Maharashtra',
+      'Gokarna, Karnataka', 'Murdeshwar, Karnataka', 'Udupi, Karnataka',
+      'Rameshwaram, Tamil Nadu', 'Kanyakumari, Tamil Nadu', 'Mahabalipuram, Tamil Nadu',
+      'Puri, Odisha', 'Chilika Lake, Odisha', 'Digha, West Bengal',
+      'Mandarmani, West Bengal',
+    ],
+  },
+  {
+    group: '🌿 Nature, Forests & Wildlife',
+    places: [
+      'Coorg, Karnataka', 'Chikmagalur, Karnataka', 'Kodagu, Karnataka',
+      'Wayanad, Kerala', 'Munnar, Kerala', 'Alleppey (Backwaters), Kerala',
+      'Thekkady, Kerala', 'Kerala Backwaters',
+      'Kaziranga, Assam', 'Manas, Assam',
+      'Bandhavgarh, Madhya Pradesh', 'Kanha, Madhya Pradesh',
+      'Pachmarhi, Madhya Pradesh', 'Satpura, Madhya Pradesh',
+      'Pench, Madhya Pradesh', 'Tadoba, Maharashtra',
+      'Kabini, Karnataka', 'Nagarhole, Karnataka',
+      'Valley of Flowers, Uttarakhand', 'Binsar, Uttarakhand',
+      'Sundarbans, West Bengal', 'Majuli Island, Assam',
+      'Lonavala, Maharashtra', 'Mahabaleshwar, Maharashtra', 'Matheran, Maharashtra',
+      'Ooty, Tamil Nadu', 'Kodaikanal, Tamil Nadu', 'Yercaud, Tamil Nadu',
+      'Coonoor, Tamil Nadu',
+    ],
+  },
+  {
+    group: '🛕 Heritage, History & Spiritual',
+    places: [
+      'Varanasi, Uttar Pradesh', 'Agra, Uttar Pradesh', 'Mathura & Vrindavan',
+      'Ayodhya, Uttar Pradesh', 'Prayagraj, Uttar Pradesh',
+      'Khajuraho, Madhya Pradesh', 'Orchha, Madhya Pradesh', 'Sanchi, Madhya Pradesh',
+      'Hampi, Karnataka', 'Badami, Karnataka', 'Pattadakal, Karnataka',
+      'Mysuru, Karnataka', 'Belur & Halebidu, Karnataka',
+      'Mahabalipuram, Tamil Nadu', 'Madurai, Tamil Nadu', 'Thanjavur, Tamil Nadu',
+      'Kanchipuram, Tamil Nadu', 'Tirupati, Andhra Pradesh',
+      'Amaravati, Andhra Pradesh', 'Lepakshi, Andhra Pradesh',
+      'Bhubaneswar, Odisha', 'Puri, Odisha', 'Konark, Odisha',
+      'Bodh Gaya, Bihar', 'Nalanda, Bihar', 'Rajgir, Bihar',
+      'Amritsar, Punjab', 'Anandpur Sahib, Punjab',
+      'Dwarka, Gujarat', 'Somnath, Gujarat', 'Palitana, Gujarat',
+      'Nashik, Maharashtra', 'Shirdi, Maharashtra', 'Aurangabad (Ajanta & Ellora)',
+      'Mahabaleshwar, Maharashtra',
+    ],
+  },
+  {
+    group: '🏙️ Cities & Urban Experiences',
+    places: [
+      'New Delhi', 'Mumbai', 'Bengaluru', 'Hyderabad', 'Chennai',
+      'Kolkata', 'Pune', 'Ahmedabad', 'Jaipur', 'Lucknow',
+      'Chandigarh', 'Bhopal', 'Indore', 'Surat', 'Nagpur',
+      'Kochi', 'Thiruvananthapuram', 'Visakhapatnam', 'Coimbatore',
+      'Mangaluru', 'Vadodara', 'Rajkot',
+    ],
+  },
+  {
+    group: '🧗 Adventure & Offbeat',
+    places: [
+      'Bir Billing, Himachal Pradesh', 'Sangla Valley, Himachal Pradesh',
+      'Chitkul, Himachal Pradesh', 'Barot, Himachal Pradesh',
+      'Lansdowne, Uttarakhand', 'Chakrata, Uttarakhand',
+      'Zanskar Valley, Ladakh', 'Nubra Valley, Ladakh', 'Pangong Lake, Ladakh',
+      'Tirthan Valley, Himachal Pradesh', 'Great Himalayan National Park',
+      'Sandakphu, West Bengal', 'Goechala, Sikkim',
+      'Meghalaya Living Root Bridges', 'Dzukou Valley, Nagaland',
+      'Phawngpui, Mizoram', 'Loktak Lake, Manipur',
+      'Rishikesh White Water Rafting', 'Chopta Tungnath Trek',
+    ],
+  },
 ];
+
+// Flat list for search + backward compat
+const DESTINATIONS = DESTINATION_GROUPS.flatMap(g => g.places);
 const INTERESTS = [
   'Heritage', 'Beaches', 'Adventure', 'Food', 'Wildlife',
   'Spiritual', 'Nature', 'Nightlife', 'Shopping', 'Wellness',
@@ -123,6 +230,16 @@ export default function PlannerPage () {
   const dispatch = useDispatch();
   const savedForm = useSelector(selectPlannerForm);
   
+  // Close destination dropdown on outside click
+  useEffect(() => {
+    function onClickOutside (e) {
+      if (destRef.current && !destRef.current.contains(e.target)) setDestOpen(false);
+    }
+    
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
+  
   const heroRef = useRef(null);
   const pkgsRef = useRef(null);
   
@@ -132,6 +249,9 @@ export default function PlannerPage () {
   
   const [origin, setOrigin] = useState(savedForm.origin || '');
   const [destination, setDest] = useState(savedForm.destination || '');
+  const [destQuery, setDestQuery] = useState('');
+  const [destOpen, setDestOpen] = useState(false);
+  const destRef = useRef(null);
   const [startDate, setStart] = useState(savedForm.startDate || '');
   const [endDate, setEnd] = useState(savedForm.endDate || '');
   const [adults, setAdults] = useState(savedForm.adults || 2);
@@ -308,19 +428,121 @@ export default function PlannerPage () {
               </div>
               <div>
                 <Label>Destination</Label>
-                <Shell error={errors.destination}>
-                  <MapPin size={16} style={{ margin: '0 0 0 14px', color: '#9CA3AF', flexShrink: 0 }}/>
-                  <select value={destination} onChange={e => sync('destination', e.target.value, setDest)}
+                {/* ── Searchable destination typeahead ── */}
+                <div ref={destRef} style={{ position: 'relative' }}>
+                  <div
+                    onClick={() => {
+                      setDestOpen(o => !o);
+                      setDestQuery('');
+                    }}
+                    style={{
+                      display: 'flex', alignItems: 'center', background: '#F9FAFB',
+                      border: `1.5px solid ${errors.destination ? '#FCA5A5' : destOpen ? SAF : '#E5E7EB'}`,
+                      borderRadius: 14, overflow: 'hidden', cursor: 'pointer',
+                      transition: 'border-color 0.2s'
+                    }}>
+                    <MapPin size={16}
+                            style={{ margin: '0 0 0 14px', color: destination ? SAF : '#9CA3AF', flexShrink: 0 }}/>
+                    <span style={{
+                      flex: 1, padding: '14px 12px', fontFamily: F, fontSize: 14,
+                      color: destination ? '#111' : '#9CA3AF', userSelect: 'none',
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                    }}>
+                      {destination || 'Search destination…'}
+                    </span>
+                    {destination && (
+                      <button type="button" onClick={e => {
+                        e.stopPropagation();
+                        sync('destination', '', setDest);
+                        setDestQuery('');
+                      }}
+                              style={{
+                                background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF',
+                                padding: '0 6px', fontSize: 16, lineHeight: 1
+                              }}>✕</button>
+                    )}
+                    <ChevronDown size={15} style={{
+                      margin: '0 12px 0 0', color: '#9CA3AF', flexShrink: 0,
+                      transform: destOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s'
+                    }}/>
+                  </div>
+                  
+                  {destOpen && (
+                    <div style={{
+                      position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 999,
+                      background: '#fff', border: '1.5px solid #E5E7EB', borderRadius: 16,
+                      boxShadow: '0 12px 40px rgba(0,0,0,0.13)', maxHeight: 340, overflowY: 'auto'
+                    }}>
+                      {/* Search input */}
+                      <div style={{
+                        padding: '10px 14px', borderBottom: '1px solid #F0F0F0',
+                        position: 'sticky', top: 0, background: '#fff', zIndex: 1
+                      }}>
+                        <input
+                          autoFocus
+                          value={destQuery}
+                          onChange={e => setDestQuery(e.target.value)}
+                          placeholder="Type to search destinations…"
                           style={{
-                            flex: 1, padding: '14px 12px', background: 'transparent', border: 'none',
-                            fontFamily: F, fontSize: 14, color: destination ? '#111' : '#9CA3AF',
-                            outline: 'none', appearance: 'none', cursor: 'pointer', width: '100%'
-                          }}>
-                    <option value="">Choose destination</option>
-                    {DESTINATIONS.map(d => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                  <ChevronDown size={15} style={{ margin: '0 12px 0 0', color: '#9CA3AF', flexShrink: 0 }}/>
-                </Shell>
+                            width: '100%', border: '1.5px solid #E5E7EB', borderRadius: 10,
+                            padding: '9px 12px', fontFamily: F, fontSize: 13, outline: 'none',
+                            color: '#111', background: '#F9FAFB', boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
+                      {/* Grouped results */}
+                      {(() => {
+                        const q = destQuery.toLowerCase().trim();
+                        const filtered = DESTINATION_GROUPS
+                          .map(g => ({
+                            ...g,
+                            places: g.places.filter(p => !q || p.toLowerCase().includes(q)),
+                          }))
+                          .filter(g => g.places.length > 0);
+                        if (!filtered.length) return (
+                          <p style={{
+                            padding: '20px 16px', textAlign: 'center', color: '#9CA3AF',
+                            fontFamily: F, fontSize: 13, margin: 0
+                          }}>No destinations found</p>
+                        );
+                        return filtered.map(g => (
+                          <div key={g.group}>
+                            <p style={{
+                              padding: '8px 14px 4px', fontFamily: F, fontSize: 10,
+                              fontWeight: 800, color: '#9CA3AF', textTransform: 'uppercase',
+                              letterSpacing: '0.12em', margin: 0, background: '#FAFAFA',
+                              borderBottom: '1px solid #F0F0F0'
+                            }}>
+                              {g.group}
+                            </p>
+                            {g.places.map(place => (
+                              <div
+                                key={place}
+                                onClick={() => {
+                                  sync('destination', place, setDest);
+                                  setDestOpen(false);
+                                  setDestQuery('');
+                                }}
+                                style={{
+                                  padding: '10px 16px', fontFamily: F, fontSize: 13.5,
+                                  color: destination === place ? SAF : '#374151',
+                                  fontWeight: destination === place ? 700 : 400,
+                                  background: destination === place ? SAF_BG : 'transparent',
+                                  cursor: 'pointer', borderBottom: '1px solid #F9FAFB',
+                                  transition: 'background 0.15s'
+                                }}
+                                onMouseEnter={e => { if (destination !== place) e.target.style.background = '#F9FAFB'; }}
+                                onMouseLeave={e => { if (destination !== place) e.target.style.background = 'transparent'; }}
+                              >
+                                {place}
+                              </div>
+                            ))}
+                          </div>
+                        ));
+                      })()}
+                    </div>
+                  )}
+                </div>
                 {errors.destination &&
                   <p style={{ fontSize: 12, color: '#EF4444', marginTop: 5, fontFamily: F }}>{errors.destination}</p>}
               </div>
