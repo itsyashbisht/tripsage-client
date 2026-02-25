@@ -20,14 +20,15 @@ import ProfilePage from './pages/ProfilePage.jsx';
 import SharedTripPage from './pages/SharedTripPage.jsx';
 import { getToken } from '@/services/axios.js';
 
-// ── Root Layout (runs once) ───────────────────────────────────
+// ── Root Layout (runs once)
 function RootLayout () {
   const dispatch = useDispatch();
-
+  
   useEffect(() => {
-    if (getToken()) dispatch(fetchMe());
+    if (getToken())
+      dispatch(fetchMe());
   }, [dispatch]);
-
+  
   return <Outlet/>;
 }
 
@@ -47,7 +48,7 @@ const ROUTER = createBrowserRouter([
       { path: '/login', element: <LoginPage/> },
       { path: '/register', element: <RegisterPage/> },
       { path: '/trip/:token', element: <SharedTripPage/> },
-
+      
       // Protected route
       {
         path: '/profile',
@@ -59,7 +60,7 @@ const ROUTER = createBrowserRouter([
       },
     ],
   },
-
+  
   // 404 fallback
   {
     path: '*',
