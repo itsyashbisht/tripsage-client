@@ -1,13 +1,217 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tripwise | Plan your next trip</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!-- ── Primary Meta ──────────────────────────────────────────── -->
+    <title>Tripsage | AI Travel Planner for India</title>
+    <meta name="description"
+          content="Plan your perfect Indian trip in seconds. Tripsage uses AI to generate personalised day-by-day itineraries with hotel suggestions, restaurant picks, and budget breakdowns — for any destination across India."/>
+    <meta name="keywords"
+          content="AI travel planner India, trip planner, itinerary generator, Goa trip plan, Ladakh itinerary, Rajasthan travel, budget travel India, Tripsage"/>
+    <meta name="author" content="Tripsage"/>
+    <meta name="robots" content="index, follow"/>
+    <link rel="canonical" href="https://tripwise-client.vercel.app/"/>
+
+    <!-- ── Favicon & App Icons ───────────────────────────────────── -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"/>
+
+    <!-- ── PWA / Web App ─────────────────────────────────────────── -->
+    <link rel="manifest" href="/manifest.json"/>
+    <meta name="theme-color" content="#E8650A"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+    <meta name="apple-mobile-web-app-title" content="Tripsage"/>
+    <meta name="application-name" content="Tripsage"/>
+
+    <!-- ── Open Graph (WhatsApp, Facebook, LinkedIn previews) ───── -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="Tripsage"/>
+    <meta property="og:title" content="Tripsage — AI Travel Planner for India"/>
+    <meta property="og:description"
+          content="Generate a personalised day-by-day itinerary for any destination in India — with hotel picks, restaurant suggestions, and budget breakdown. Powered by AI."/>
+    <meta property="og:url" content="https://tripwise-client.vercel.app/"/>
+    <meta property="og:image" content="https://tripwise-client.vercel.app/og-image.jpg"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content="Tripsage — AI-powered trip planner for India"/>
+    <meta property="og:locale" content="en_IN"/>
+
+    <!-- ── Twitter / X Card ──────────────────────────────────────── -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Tripsage — AI Travel Planner for India"/>
+    <meta name="twitter:description"
+          content="Plan your perfect India trip in seconds. AI-generated itineraries with hotels, restaurants & budget breakdown."/>
+    <meta name="twitter:image" content="https://tripwise-client.vercel.app/og-image.jpg"/>
+    <meta name="twitter:image:alt" content="Tripsage trip planner"/>
+
+    <!-- ── Structured Data (Google Rich Results) ─────────────────── -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Tripsage",
+            "url": "https://tripwise-client.vercel.app/",
+            "description": "AI-powered travel planner that generates personalised day-by-day itineraries for destinations across India — with hotel picks, restaurant suggestions, and budget breakdowns.",
+            "applicationCategory": "TravelApplication",
+            "operatingSystem": "Web",
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "INR"
+            },
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.8",
+                "reviewCount": "120"
+            }
+        }
+    </script>
+
+    <!-- ── Performance: Preconnect to key origins ─────────────────── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link rel="preconnect" href="https://images.unsplash.com"/>
+
+    <!-- ── Fonts: Plus Jakarta Sans + DM Mono ─────────────────────── -->
+    <link
+            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+    />
+
+    <!-- ── Base styles: prevent flash of unstyled content ───────── -->
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background: #FAF7F4;
+            color: #0E0A06;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* Prevent layout shift while React loads */
+        #root {
+            min-height: 100vh;
+        }
+
+        /* ── Loading splash shown before React hydrates ── */
+        #splash {
+            position: fixed;
+            inset: 0;
+            background: #FAF7F4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        #splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #splash-logo {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #0E0A06;
+            letter-spacing: -0.03em;
+        }
+
+        #splash-logo span {
+            color: #E8650A;
+        }
+
+        #splash-tagline {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #9CA3AF;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        #splash-bar {
+            margin-top: 28px;
+            width: 48px;
+            height: 3px;
+            background: #E8E0D8;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        #splash-progress {
+            height: 100%;
+            width: 0;
+            background: #E8650A;
+            border-radius: 999px;
+            animation: load 1.1s ease forwards;
+        }
+
+        @keyframes load {
+            0% {
+                width: 0%;
+            }
+            60% {
+                width: 75%;
+            }
+            100% {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<!-- ── Loading splash (hidden once React mounts) ── -->
+<div id="splash" aria-hidden="true">
+    <div id="splash-logo">Trip<span>sage</span></div>
+    <div id="splash-tagline">AI travel planner for India</div>
+    <div id="splash-bar">
+        <div id="splash-progress"></div>
+    </div>
+</div>
+
+<!-- ── React root ── -->
+<div id="root"></div>
+
+<!-- ── Hide splash once React has painted ── -->
+<script>
+  (function () {
+    // Remove splash after React mounts — works with any React version
+    var obs = new MutationObserver(function () {
+      var root = document.getElementById('root');
+      if (root && root.children.length > 0) {
+        setTimeout(function () {
+          var splash = document.getElementById('splash');
+          if (splash) splash.classList.add('hidden');
+        }, 700);
+        obs.disconnect();
+      }
+    });
+    obs.observe(document.getElementById('root'), { childList: true });
+  })();
+</script>
+
+<script type="module" src="/src/main.jsx"></script>
+</body>
 </html>

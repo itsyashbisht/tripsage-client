@@ -84,7 +84,7 @@ export function Navbar () {
               fontFamily: F, fontWeight: 900, fontSize: 20,
               color: scrolled ? '#111' : '#fff', letterSpacing: '-0.02em', transition: 'color 0.3s'
             }}>
-              TripWise
+              TripSage
             </span>
           </Link>
 
