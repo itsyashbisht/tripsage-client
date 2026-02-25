@@ -13,4 +13,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // Tells Vite this is a Single Page App — prevents 404 on refresh
+  appType: 'spa',
+  preview: {
+    port: 4173,
+  },
 });
