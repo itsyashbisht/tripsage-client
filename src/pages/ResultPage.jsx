@@ -87,12 +87,13 @@ function getHeroImage (destination = '') {
   return DEFAULT_HERO;
 }
 
-// ── Validate the AI title actually mentions the destination ──────────────────
+// ── Validate the AI title actually mentions the destination
 function getTripTitle (aiTitle, destination, days, tier) {
   const dest = (destination || '').split(',')[0].trim();
   if (aiTitle && dest && aiTitle.toLowerCase().includes(dest.toLowerCase().split(' ')[0])) {
     return aiTitle;  // AI title is destination-specific — use it
   }
+  
   // AI title is wrong (mentions another city) — generate a correct fallback
   const fallbacks = {
     economy: [`Budget Explorer: ${dest} in ${days} Days`, `${dest} on a Shoestring`, `Backpacker's ${dest}`],
@@ -103,7 +104,7 @@ function getTripTitle (aiTitle, destination, days, tier) {
   return opts[Math.floor(Math.random() * opts.length)];
 }
 
-// ─── Hotel Suggestion Card ───────────────────────────────────────────────────
+// ─── Hotel Suggestion Card
 function HotelCard ({ hotel, adults }) {
   return (
     <div style={{
@@ -157,7 +158,7 @@ function HotelCard ({ hotel, adults }) {
   );
 }
 
-// ─── Restaurant Suggestion Pills ─────────────────────────────────────────────
+// ─── Restaurant Suggestion Pills
 function FoodSuggestions ({ suggestions, mealLabel }) {
   const [selected, setSelected] = useState(0);
   if (!suggestions?.length) return null;
@@ -260,7 +261,7 @@ function FoodSuggestions ({ suggestions, mealLabel }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ─── Main Page
 export default function ResultsPage () {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -299,7 +300,9 @@ export default function ResultsPage () {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Reset active day when itinerary changes
-  useEffect(() => { setActiveDay(1); }, [aiItinerary?._id]);
+  useEffect(() => {
+    setActiveDay(1);
+    }, [aiItinerary?._id]);
   
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
@@ -361,7 +364,7 @@ export default function ResultsPage () {
     );
   }
   
-  // ─── Sidebar (shared by mobile drawer + desktop sticky column) ──────────────
+  // ─── Sidebar (shared by mobile drawer + desktop sticky column)
   const SidebarContent = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       

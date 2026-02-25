@@ -31,7 +31,7 @@ function RootLayout () {
   return <Outlet/>;
 }
 
-// ── Router ────────────────────────────────────────────────────
+// ── Router
 const ROUTER = createBrowserRouter([
   {
     element: <RootLayout/>, // runs once for all routes

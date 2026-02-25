@@ -1,4 +1,3 @@
-// src/pages/LoginPage.jsx
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,32 +16,32 @@ export default function LoginPage () {
   const isAuth = useSelector(selectIsAuthenticated);
   const loading = useSelector(selectAuthLoading);
   const error = useSelector(selectAuthError);
-
+  
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const from = location.state?.from || '/';
-
+  
   useEffect(() => { if (isAuth) navigate(from, { replace: true }); }, [isAuth]);
   useEffect(() => () => dispatch(clearAuthError('login')), []);
-
+  
   const onChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
   const onSubmit = (e) => {
     e.preventDefault();
     if (form.email && form.password) dispatch(loginUser(form));
   };
-
+  
   const inputStyle = (focus) => ({
     width: '100%', padding: '14px 16px 14px 44px', background: '#F9FAFB',
     border: `1.5px solid ${focus ? SAFFRON : '#EFEFEF'}`, borderRadius: 14,
     fontSize: 14, fontFamily: F, color: '#111', outline: 'none',
     boxSizing: 'border-box', transition: 'border-color 0.2s',
   });
-
+  
   const [focusField, setFocus] = useState('');
-
+  
   return (
     <div style={{ minHeight: '100vh', display: 'flex', fontFamily: F }}>
-
+      
       {/* Left — hero */}
       <div style={{ flex: 1, position: 'relative', display: 'none' }} className="auth-hero">
         <img src={BG} alt=""
@@ -91,7 +90,7 @@ export default function LoginPage () {
           </div>
         </div>
       </div>
-
+      
       {/* Right — form */}
       <div style={{
         width: '100%',
@@ -106,7 +105,7 @@ export default function LoginPage () {
         <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
                     style={{ width: '100%', maxWidth: 400 }}>
-
+          
           {/* Mobile logo */}
           <Link to="/" style={{
             display: 'inline-flex',
@@ -128,7 +127,7 @@ export default function LoginPage () {
             </div>
             <span style={{ fontWeight: 900, fontSize: 20, color: '#111', letterSpacing: '-0.02em' }}>TripWise</span>
           </Link>
-
+          
           <h1 style={{
             fontWeight: 900,
             fontSize: 'clamp(1.8rem,4vw,2.4rem)',
@@ -139,7 +138,7 @@ export default function LoginPage () {
             Welcome back
           </h1>
           <p style={{ color: '#9CA3AF', fontSize: 15, marginBottom: 36 }}>Sign in to continue planning your trip.</p>
-
+          
           {/* Error banner */}
           <AnimatePresence>
             {error.login && (
@@ -153,9 +152,9 @@ export default function LoginPage () {
               </motion.div>
             )}
           </AnimatePresence>
-
+          
           <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
+            
             {/* Email */}
             <div>
               <p style={{
@@ -181,7 +180,7 @@ export default function LoginPage () {
                        onFocus={() => setFocus('email')} onBlur={() => setFocus('')}/>
               </div>
             </div>
-
+            
             {/* Password */}
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -233,7 +232,7 @@ export default function LoginPage () {
                 </button>
               </div>
             </div>
-
+            
             {/* Submit */}
             <motion.button type="submit" disabled={loading.login}
                            whileHover={{ scale: loading.login ? 1 : 1.02 }} whileTap={{ scale: 0.97 }}
@@ -249,7 +248,7 @@ export default function LoginPage () {
                 : <>Sign in <ArrowRight size={16}/></>}
             </motion.button>
           </form>
-
+          
           <p style={{ textAlign: 'center', marginTop: 32, fontSize: 14, color: '#6B7280' }}>
             No account?{' '}
             <Link to="/register" style={{ color: SAFFRON, fontWeight: 700, textDecoration: 'none' }}>Create one free
@@ -257,7 +256,7 @@ export default function LoginPage () {
           </p>
         </motion.div>
       </div>
-
+      
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @media (min-width: 768px) { .auth-hero { display: block !important; } }
