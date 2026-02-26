@@ -1,9 +1,9 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { destinations } from '../services/axios.js';
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { destinations } from "../services/axios.js";
 
 // ASYNC THUNKS
 export const fetchAllDestinations = createAsyncThunk(
-  'destination/getAll',
+  "destination/getAll",
   async (params = {}, { rejectWithValue }) => {
     try {
       const res = await destinations.getAll(params);
@@ -11,11 +11,11 @@ export const fetchAllDestinations = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
-  }
+  },
 );
 
 export const fetchDestinationBySlug = createAsyncThunk(
-  'destination/getBySlug',
+  "destination/getBySlug",
   async (slug, { rejectWithValue }) => {
     try {
       const res = await destinations.getBySlug(slug);
@@ -23,23 +23,25 @@ export const fetchDestinationBySlug = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
-  }
+  },
 );
 
+// FIX: pass tier inside params object so getHotels(slug, params) receives it correctly
 export const fetchDestinationHotels = createAsyncThunk(
-  'destination/getHotels',
+  "destination/getHotels",
   async ({ slug, tier }, { rejectWithValue }) => {
     try {
-      const res = await destinations.getHotels(slug, tier);
+      const params = tier && tier !== "all" ? { tier } : {};
+      const res = await destinations.getHotels(slug, params);
       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
-  }
+  },
 );
 
 export const fetchDestinationAttractions = createAsyncThunk(
-  'destination/getAttractions',
+  "destination/getAttractions",
   async (slug, { rejectWithValue }) => {
     try {
       const res = await destinations.getAttractions(slug);
@@ -47,11 +49,11 @@ export const fetchDestinationAttractions = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
-  }
+  },
 );
 
 export const fetchDestinationRestaurants = createAsyncThunk(
-  'destination/getRestaurants',
+  "destination/getRestaurants",
   async ({ slug, params = {} }, { rejectWithValue }) => {
     try {
       const res = await destinations.getRestaurants(slug, params);
@@ -59,18 +61,21 @@ export const fetchDestinationRestaurants = createAsyncThunk(
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || err.message);
     }
-  }
+  },
 );
 
-
+// ─────────────────────────────────────────────────────────────
 // SLICE
+// ─────────────────────────────────────────────────────────────
+
 const initialState = {
-  list: [],           // all destinations (list view)
+  list: [],
   total: 0,
-  current: null,      // single destination detail
-  hotels: [],         // hotels for current destination
-  attractions: [],    // attractions for current destination
-  restaurants: [],    // restaurants for current destination
+  current: null,
+  hotels: [],
+  attractions: [],
+  restaurants: [],
+
   loading: {
     list: false,
     current: false,
@@ -88,8 +93,9 @@ const initialState = {
 };
 
 const destinationSlice = createSlice({
-  name: 'destination',
+  name: "destination",
   initialState,
+
   reducers: {
     clearCurrentDestination: (state) => {
       state.current = null;
@@ -100,10 +106,16 @@ const destinationSlice = createSlice({
     clearDestinationError: (state, action) => {
       state.error[action.payload] = null;
     },
+    // Allows pages to optimistically clear results when switching destinations
+    clearDestinationHotels: (state) => {
+      state.hotels = [];
+    },
+    clearDestinationRestaurants: (state) => {
+      state.restaurants = [];
+    },
   },
 
   extraReducers: (builder) => {
-
     // ── GET ALL ──────────────────────────────────────────────
     builder
       .addCase(fetchAllDestinations.pending, (state) => {
@@ -143,7 +155,11 @@ const destinationSlice = createSlice({
       })
       .addCase(fetchDestinationHotels.fulfilled, (state, action) => {
         state.loading.hotels = false;
-        state.hotels = action.payload?.hotels || action.payload || [];
+        // Normalise: API may return { hotels: [...] } or [...] directly
+        const raw = action.payload;
+        state.hotels = Array.isArray(raw)
+          ? raw
+          : raw?.hotels || raw?.data || [];
       })
       .addCase(fetchDestinationHotels.rejected, (state, action) => {
         state.loading.hotels = false;
@@ -158,7 +174,10 @@ const destinationSlice = createSlice({
       })
       .addCase(fetchDestinationAttractions.fulfilled, (state, action) => {
         state.loading.attractions = false;
-        state.attractions = action.payload?.attractions || action.payload || [];
+        const raw = action.payload;
+        state.attractions = Array.isArray(raw)
+          ? raw
+          : raw?.attractions || raw?.data || [];
       })
       .addCase(fetchDestinationAttractions.rejected, (state, action) => {
         state.loading.attractions = false;
@@ -173,7 +192,10 @@ const destinationSlice = createSlice({
       })
       .addCase(fetchDestinationRestaurants.fulfilled, (state, action) => {
         state.loading.restaurants = false;
-        state.restaurants = action.payload?.restaurants || action.payload || [];
+        const raw = action.payload;
+        state.restaurants = Array.isArray(raw)
+          ? raw
+          : raw?.restaurants || raw?.data || [];
       })
       .addCase(fetchDestinationRestaurants.rejected, (state, action) => {
         state.loading.restaurants = false;
@@ -182,11 +204,17 @@ const destinationSlice = createSlice({
   },
 });
 
-export const { clearCurrentDestination, clearDestinationError } = destinationSlice.actions;
+export const {
+  clearCurrentDestination,
+  clearDestinationError,
+  clearDestinationHotels,
+  clearDestinationRestaurants,
+} = destinationSlice.actions;
 export default destinationSlice.reducer;
 
-
+// ─────────────────────────────────────────────────────────────
 // SELECTORS
+// ─────────────────────────────────────────────────────────────
 export const selectDestinations = (s) => s.destination.list;
 export const selectDestinationsTotal = (s) => s.destination.total;
 export const selectCurrentDestination = (s) => s.destination.current;

@@ -1,5 +1,5 @@
-export { default } from './store.js';
-export { useAppDispatch } from './store.js';
+export { default } from "./store.js";
+export { useAppDispatch } from "./store.js";
 
 // AUTH
 export {
@@ -13,7 +13,7 @@ export {
   selectIsAuthenticated,
   selectAuthLoading,
   selectAuthError,
-} from '../slices/authSlice.js';
+} from "../slices/authSlice.js";
 
 // USER
 export {
@@ -30,7 +30,7 @@ export {
   selectUserLoading,
   selectUserError,
   selectUserSuccess,
-} from '../slices/userSlice.js';
+} from "../slices/userSlice.js";
 
 // DESTINATION
 export {
@@ -41,6 +41,8 @@ export {
   fetchDestinationRestaurants,
   clearCurrentDestination,
   clearDestinationError,
+  clearDestinationHotels,
+  clearDestinationRestaurants,
   selectDestinations,
   selectDestinationsTotal,
   selectCurrentDestination,
@@ -49,7 +51,7 @@ export {
   selectDestinationRestaurants,
   selectDestinationLoading,
   selectDestinationError,
-} from '../slices/destinationSlice.js';
+} from "../slices/destinationSlice.js";
 
 // HOTEL
 export {
@@ -61,7 +63,7 @@ export {
   selectCurrentHotel,
   selectHotelLoading,
   selectHotelError,
-} from '../slices/hotelSlice.js';
+} from "../slices/hotelSlice.js";
 
 // RESTAURANT
 export {
@@ -73,7 +75,7 @@ export {
   selectCurrentRestaurant,
   selectRestaurantLoading,
   selectRestaurantError,
-} from '../slices/restaurantSlice.js';
+} from "../slices/restaurantSlice.js";
 
 // ITINERARY
 export {
@@ -97,7 +99,7 @@ export {
   selectItineraryLoading,
   selectItineraryError,
   selectItinerarySuccess,
-} from '../slices/itinerarySlice.js';
+} from "../slices/itinerarySlice.js";
 
 // GENERATE
 export {
@@ -114,7 +116,7 @@ export {
   selectPlannerForm,
   selectGenerateLoading,
   selectGenerateError,
-} from '../slices/generateSlice.js';
+} from "../slices/generateSlice.js";
 
 // REVIEW
 export {
@@ -128,4 +130,4 @@ export {
   selectReviewLoading,
   selectReviewError,
   selectReviewSuccess,
-} from '../slices/reviewSlice.js';
+} from "../slices/reviewSlice.js";
