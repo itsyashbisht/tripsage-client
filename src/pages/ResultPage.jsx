@@ -302,7 +302,7 @@ export default function ResultsPage () {
   // Reset active day when itinerary changes
   useEffect(() => {
     setActiveDay(1);
-    }, [aiItinerary?._id]);
+  }, [aiItinerary?._id]);
   
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });

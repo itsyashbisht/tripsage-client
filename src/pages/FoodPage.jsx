@@ -136,6 +136,13 @@ const STATIC_RESTAURANTS = [
   },
 ];
 
+// mustTryDishes can arrive as array, comma-string, or other — always normalise to array
+const toArray = (v) => {
+  if (Array.isArray(v)) return v;
+  if (typeof v === 'string' && v.trim()) return v.split(',').map(s => s.trim()).filter(Boolean);
+  return [];
+};
+
 const PRICE_RANGES = ['All', 'Budget', 'Mid-Range', 'Premium'];
 const PRICE_MAP = { budget: 'Budget', mid: 'Mid-Range', premium: 'Premium' };
 const RANGE_COLORS = { Budget: '#16A34A', 'Mid-Range': SAFFRON, Premium: '#9333EA' };
@@ -427,7 +434,7 @@ export default function FoodPage () {
                         marginBottom: 14,
                         flex: 1
                       }}>{rest.description}</p>
-                      {rest.mustTryDishes?.length > 0 && (
+                      {toArray(rest.mustTryDishes).length > 0 && (
                         <div style={{ marginBottom: 14 }}>
                           <p style={{
                             fontFamily: FONT,
@@ -439,7 +446,7 @@ export default function FoodPage () {
                             marginBottom: 7
                           }}>Must Try</p>
                           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                            {rest.mustTryDishes && rest.mustTryDishes.slice(0, 3).map(dish => (
+                            {toArray(rest.mustTryDishes).slice(0, 3).map(dish => (
                               <span key={dish} style={{
                                 fontFamily: FONT,
                                 fontSize: 11,
@@ -453,11 +460,7 @@ export default function FoodPage () {
                           </div>
                         </div>
                       )}
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                           <p style={{
                             fontFamily: MONO,
