@@ -1,143 +1,104 @@
-# Tripwise Client 🚀
+# Tripsage Client
 
-A polished React frontend bootstrapped with Vite. Tripwise is a travel planning web application allowing users to discover destinations, create and save itineraries, and collaborate on shared trips.
+Frontend client for **Tripsage**, an AI-powered travel planning app focused on India.
 
-This repository holds the client-side code built with React, TailwindCSS, Redux Toolkit, and Vite for fast development and optimized builds.
+This project is built with React + Vite and provides the user-facing experience for itinerary generation, destination discovery, saved trips, sharing, and profile flows.
 
----
+## Overview
 
-## 🧱 Tech Stack
+Tripsage helps users:
+- Generate personalized itineraries
+- Explore destinations, hotels, restaurants, and attractions
+- Save and share plans
+- Manage account/profile details
+- Read and post travel reviews
 
-- **Frontend**: React 19 + JSX
-- **Bundler**: Vite 7 with `@vitejs/plugin-react`
-- **Styling**: Tailwind CSS 4 & `tailwind-merge`
-- **State Management**: Redux Toolkit with slices for auth, destinations, hotels, restaurants, reviews, itineraries, etc.
-- **Routing**: React Router v7
-- **Forms & Validation**: React Hook Form, Zod, and `@hookform/resolvers`
-- **UI Components**: Custom UI primitives built on Radix UI + Headless UI patterns
-- **HTTP Client**: Axios (configured in `services/axios.js`)
-- **Utilities**: date-fns, framer-motion, recharts, embla-carousel, sonner, and more
+## Tech Stack
 
----
+- React 19
+- Vite 7
+- Tailwind CSS 4
+- Redux Toolkit + React Redux
+- React Router 7
+- Axios
+- React Hook Form + Zod
+- Radix UI components
 
-## 📁 Project Structure
+## Project Structure
 
-```
+```text
 src/
-  ├─ components/      # Shared UI components and Radix-based primitives
-  ├─ constants/       # API endpoint definitions
-  ├─ hooks/           # Custom hooks (e.g. use-mobile)
-  ├─ layouts/         # AppLayout, etc.
-  ├─ pages/           # Route components (Home, Profile, Planner, etc.)
-  ├─ routes/          # Private route wrappers
-  ├─ services/        # Axios instance and other external integrations
-  ├─ slices/          # Redux slices for domain data
-  ├─ store/           # Redux store configuration
-  └─ styles/          # Tailwind and global styles
+  components/      Reusable UI components
+  constants/       API endpoint constants
+  hooks/           Custom hooks
+  layouts/         Shared layouts
+  pages/           Route pages
+  routes/          Route guards/wrappers
+  services/        API/service layer (Axios)
+  slices/          Redux slices
+  store/           Redux store setup
+  styles/          Global and theme styles
 ```
 
----
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- Node.js v18+
-- npm or yarn
+- Node.js 18+
+- npm
 
-### Installation
+### Install
 
 ```bash
-# clone repo
-git clone <repo-url>
-cd tripwise-client
-
-# install dependencies
 npm install
-# or
-# yarn
 ```
 
-### Development
-
-Start the development server with hot reloading:
+### Run Development Server
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:5173 in your browser.
+Default local URL: `http://localhost:5173`
 
 ### Production Build
 
 ```bash
 npm run build
-npm run preview  # serve the production build locally
+npm run preview
 ```
 
----
+Preview URL defaults to `http://localhost:4173`.
 
-## 🛠 Features
+## Available Scripts
 
-- **Authentication** (login/register) using JWTs
-- **Destination browsing** with search and filters
-- **Hotel and restaurant recommendation pages**
-- **Itinerary planner** that lets users add stops, dates, and travel modes
-- **Saved plans** and the ability to share itineraries with others
-- **Profile management** and review system
-- **Responsive design** with mobile-first UI
-- **Dark/light theme support** via `next-themes`
+- `npm run dev` - Start development server
+- `npm run build` - Build production bundle
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run ESLint
 
----
+## Environment Variables
 
-## ✅ Scripts
-
-| Command            | Description                       |
-|-------------------|-----------------------------------|
-| `npm run dev`      | Start development server          |
-| `npm run build`    | Build for production             |
-| `npm run preview`  | Preview production build locally |
-| `npm run lint`     | Run ESLint across the project     |
-
----
-
-## ⚙️ Environment Variables
-
-Copy `.env.example` (if present) to `.env` and configure:
+Create a `.env` file in the project root:
 
 ```env
-VITE_API_BASE_URL=http://localhost:5000/api
-# other vars as needed
+VITE_API_URL=http://localhost:8000
 ```
 
-The client expects the backend REST API to follow endpoints defined in `src/constants/apiEndpoints.js`.
+This should point to the Tripsage backend base URL.
 
----
+## API Contract
 
-## 🙌 Contributing
+Client-side endpoints are defined in:
+- `src/constants/apiEndpoints.js`
 
-1. Fork the repo
-2. Create a feature branch (`git checkout -b feature-name`)
-3. Commit your changes (`git commit -m 'Add some feature'`)
-4. Push to the branch (`git push origin feature-name`)
-5. Open a pull request
+The app expects backend routes under `/api/v1/...`.
 
-Please follow existing code style and write descriptive commit messages.
+## Notes
 
----
+- Path alias `@` maps to `src` (configured in `vite.config.js`)
+- Vite is configured as an SPA (`appType: 'spa'`) to avoid refresh 404s
 
-## 📄 License
+## Rename Note
 
-This project is [MIT licensed](LICENSE) (if applicable).
-
----
-
-## 💡 Notes
-
-- ESLint is configured in `eslint.config.js`.
-- Tailwind configuration lives in `tailwind.config.js`.
-- The codebase uses TypeScript typings for React components via `@types/react` despite being a `.jsx`/`.tsx` hybrid.
-
-
-Happy coding! ✈️
-
+This client is now branded as **Tripsage** (previously Tripwise in some older code/comments).
